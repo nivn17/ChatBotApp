@@ -9,4 +9,7 @@ public class PythonChatRequest
 
     [JsonPropertyName("Message")]
     public string Message { get; set; } = "";
+
+    [JsonPropertyName("persona_id")]
+    public string? PersonaId { get; set; }
 }

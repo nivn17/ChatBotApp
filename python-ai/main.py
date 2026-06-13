@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from openai import OpenAI
 import os
+from personas import list_personas, get_persona
 
 app = FastAPI()
 
@@ -8,10 +9,17 @@ app = FastAPI()
 def health():
     return {"status": "ok"}
 
+@app.get("/ai/personas")
+def personas():
+    return list_personas()
+
 @app.post("/ai/chat")
 async def chat(request: Request):
     data = await request.json()
-
+   
+    persona_id = data.get("persona_id") or data.get("personaId") or data.get("PersonaId")
+    persona = get_persona(persona_id)
+   
     # Accept many possible field names from .NET
     message = data.get("message") or data.get("Message")
     conversation_id = (
@@ -30,7 +38,8 @@ async def chat(request: Request):
     client = OpenAI(api_key=api_key)
 
     resp = client.responses.create(
-        model="gpt-4o-mini",
+        model="gpt-4.1-2025-04-14",
+        instructions=persona["system_prompt"],
         input=message
     )
 

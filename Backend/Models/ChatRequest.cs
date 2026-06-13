@@ -8,4 +8,5 @@ public class ChatRequest
     //for user messages
     public string Message {get; set;} = string.Empty;
 
+    public string? PersonaId {get; set;}
 }

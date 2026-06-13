@@ -71,7 +71,7 @@ app.MapPost("/chat", async (ChatRequest req, AppDbContext db, IHttpClientFactory
     }
     else
     {
-        conversation = new Conversation();
+        conversation = new Conversation {PersonaId = req.PersonaId};
         db.Conversations.Add(conversation);
         await db.SaveChangesAsync(); // generates conversation.Id
     }
@@ -89,7 +89,8 @@ app.MapPost("/chat", async (ChatRequest req, AppDbContext db, IHttpClientFactory
     var pyRes = await client.PostAsJsonAsync("/ai/chat",new PythonChatRequest
     {
         ConversationId = conversation.Id,
-        Message=req.Message
+        Message=req.Message,
+        PersonaId = req.PersonaId
     });
 
 if (!pyRes.IsSuccessStatusCode)
@@ -109,7 +110,14 @@ if (!pyRes.IsSuccessStatusCode)
 
     await db.SaveChangesAsync();
 
-    return Results.Ok(new { conversationId = conversation.Id, answer });
+    return Results.Ok(new { conversationId = conversation.Id,personaId = conversation.PersonaId, answer });
+});
+
+app.MapGet("/ai/personas", async (IHttpClientFactory http) =>
+{
+    var client = http.CreateClient("Python");
+    var personas  =client.GetFromJsonAsync<List<PersonaDto>>("/personas");
+    return Results.Ok(await personas);
 });
 
 
